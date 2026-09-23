@@ -7,9 +7,9 @@ Application mobile et API intelligente de planification de voyages au Maroc alim
 
 ## 📖 À propos
 
-**AI Travel Assistant** est une solution complète (Mobile + Backend REST) conçue pour aider les voyageurs à découvrir, organiser et optimiser leurs séjours au Maroc (Marrakech, Fès, Tanger, etc.).
+**AI Travel Assistant** est une solution complète (Mobile + Backend REST & Temps Réel) conçue pour aider les voyageurs à découvrir, organiser et optimiser leurs séjours au Maroc (Marrakech, Fès, Tanger, etc.).
 
-L'application intègre un agent conversationnel autonome capable de répondre en direct grâce au **Streaming SSE**, de retrouver des spots précis par **recherche sémantique vectorielle via Pinecone** et de manipuler les données utilisateur via le **Function Calling**.
+L'application intègre un agent conversationnel autonome capable d'interagir en direct grâce aux **WebSockets (Socket.io)** pour un streaming bidirectionnel fluide, de retrouver des spots précis par **recherche sémantique vectorielle via Pinecone** et de manipuler les données utilisateur via le **Function Calling**.
 
 ### 💡 Exemple d'utilisation :
 > **Voyageur :** *"J'ai 1 500 DH et je veux passer 3 jours à Marrakech. Je cherche des spots calmes et de la bonne cuisine locale."*  
@@ -21,11 +21,12 @@ L'application intègre un agent conversationnel autonome capable de répondre en
 
 ### 📱 Application Mobile (React Native / Expo)
 - **Authentification sécurisée :** Stockage chiffré des tokens via `Expo SecureStore`, persistance d'état avec `Zustand`.
-- **Chat interactif en Streaming (SSE) :** Affichage fluide et progressif mot par mot des réponses de l'agent.
+- **Chat interactif en WebSockets :** Connexion persistante bidirectionnelle, affichage progressif des réponses de l'agent et statut de saisie ("en train d'écrire...").
 - **Visualisation d'Itinéraire :** Cartes interactives par jour (Jour 1, Jour 2, etc.) avec activités, restaurants et budget estimé.
 - **Mode hors-ligne / Cache :** Persistance locale des voyages enregistrés avec `AsyncStorage`.
 
-### ⚙️ Backend & Agent IA (Express + PostgreSQL + Pinecone)
+### ⚙️ Backend & Agent IA (Express + Socket.io + PostgreSQL + Pinecone)
+- **Communication Temps Réel :** Passerelle WebSocket sécurisée avec authentification par handshake JWT.
 - **Recherche sémantique (RAG) :** Découverte de lieux basée sur les embeddings stockés et indexés dans **Pinecone**.
 - **Appel d'outils (Function Calling) :**
   - `searchPlaces(city, category, budget)` : Récupère les données fiables de la base SQL.
@@ -38,13 +39,13 @@ L'application intègre un agent conversationnel autonome capable de répondre en
 
 | Couche | Technologies |
 | :--- | :--- |
-| **Frontend Mobile** | React Native, Expo, Expo Router, Zustand, Axios, React Native Reanimated |
-| **Backend API** | Node.js, Express.js |
+| **Frontend Mobile** | React Native, Expo, Expo Router, Zustand, Socket.io-client, Axios |
+| **Backend API & Realtime** | Node.js, Express.js, Socket.io (WebSockets) |
 | **Base Relationnelle** | PostgreSQL normalisée (3NF) |
 | **Base Vectorielle** | Pinecone (Serverless Vector Index) |
-| **ORM** | Sequelize|
-| **Authentification** | JWT (Access & Refresh) + bcrypt + Expo SecureStore |
-| **Moteur IA** | API OpenAI / Anthropic Claude (Function Calling, Embeddings, SSE) |
+| **ORM** | Sequelize  |
+| **Authentification** | JWT (Handshake WebSocket & REST) + bcrypt + Expo SecureStore |
+| **Moteur IA** | API OpenAI / Anthropic Claude (Function Calling, Embeddings, Token Streaming) |
 | **Validation & Logs** | Zod / Express-validator, Morgan |
 | **DevOps & Tests** | Docker, Docker Compose, Postman |
 
@@ -59,15 +60,19 @@ ai-travel-assistant/
 │   ├── src/
 │   │   ├── config/
 │   │   │   ├── database.js
-│   │   │   ├── pinecone.js           # Client et configuration d'index Pinecone
+│   │   │   ├── pinecone.js           # Configuration Pinecone
+│   │   │   ├── socket.js             # Initialisation Socket.io
 │   │   │   ├── ai.js
 │   │   │   └── env.js
 │   │   │
 │   │   ├── controllers/
 │   │   │   ├── auth.controller.js
 │   │   │   ├── place.controller.js
-│   │   │   ├── trip.controller.js
-│   │   │   └── ai.controller.js
+│   │   │   └── trip.controller.js
+│   │   │
+│   │   ├── sockets/
+│   │   │   ├── chat.socket.js        # Gestion des événements WebSocket (chat, stream)
+│   │   │   └── auth.socket.js        # Middleware de vérification JWT pour sockets
 │   │   │
 │   │   ├── models/
 │   │   │   ├── User.js
@@ -83,7 +88,6 @@ ai-travel-assistant/
 │   │   │   ├── auth.routes.js
 │   │   │   ├── place.routes.js
 │   │   │   ├── trip.routes.js
-│   │   │   ├── ai.routes.js
 │   │   │   └── index.js
 │   │   │
 │   │   ├── middlewares/
@@ -95,7 +99,7 @@ ai-travel-assistant/
 │   │   │   ├── auth.service.js
 │   │   │   ├── trip.service.js
 │   │   │   ├── rag.service.js
-│   │   │   ├── pinecone.service.js   # Requêtes upsert et query vers Pinecone
+│   │   │   ├── pinecone.service.js
 │   │   │   └── ai.service.js
 │   │   │
 │   │   ├── validators/
@@ -104,7 +108,7 @@ ai-travel-assistant/
 │   │   │   └── place.validator.js
 │   │   │
 │   │   ├── app.js
-│   │   └── server.js
+│   │   └── server.js                 # Serveur HTTP + Socket.io
 │   │
 │   ├── migrations/
 │   ├── seeders/
@@ -120,7 +124,7 @@ ai-travel-assistant/
 │   │   ├── (tabs)/
 │   │   │   ├── _layout.jsx
 │   │   │   ├── index.jsx             # Accueil & exploration
-│   │   │   ├── chat.jsx              # Interface de discussion avec l'agent
+│   │   │   ├── chat.jsx              # Interface de discussion WebSocket
 │   │   │   └── trips.jsx             # Liste des voyages planifiés
 │   │   ├── trip/
 │   │   │   └── [id].jsx              # Détail d'un itinéraire
@@ -133,16 +137,16 @@ ai-travel-assistant/
 │   │   │   ├── DayTimeline.jsx
 │   │   │   └── CustomButton.jsx
 │   │   │
-│   │   ├── stores/                   # Stores Zustand modulaires
-│   │   │   ├── authStore.js          # Tokens, session utilisateur
-│   │   │   ├── chatStore.js          # Messages, statut du streaming SSE
-│   │   │   └── tripStore.js          # Liste et création de voyages
+│   │   ├── stores/                   # Stores Zustand
+│   │   │   ├── authStore.js          # Tokens, session
+│   │   │   ├── chatStore.js          # Messages, statut d'envoi
+│   │   │   └── tripStore.js          # Voyages créés
 │   │   │
-│   │   ├── services/                 # Appels API Axios & SSE
-│   │   │   ├── api.js                # Instance Axios centralisée + Intercepteurs
+│   │   ├── services/                 # Connecteurs API & WebSockets
+│   │   │   ├── api.js                # Instance Axios REST
+│   │   │   ├── socket.js             # Connexion et listeners Socket.io
 │   │   │   ├── auth.api.js
-│   │   │   ├── trip.api.js
-│   │   │   └── chatStream.js         # Gestionnaire du flux SSE
+│   │   │   └── trip.api.js
 │   │   │
 │   │   ├── constants/
 │   │   │   ├── colors.js
@@ -185,16 +189,16 @@ cd ai-travel-assistant
 ```bash
 cd backend
 
-# Copier et configurer les variables d'environnement
+# Configurer les variables d'environnement
 cp .env.example .env
 
-# Lancer la base PostgreSQL via Docker
+# Lancer PostgreSQL via Docker
 docker compose up -d db
 
-# Installer les dépendances
+# Installer les dépendances (y compris socket.io)
 npm install
 
-# Exécuter les migrations et les seeders
+# Exécuter les migrations et seeders
 npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
 
@@ -203,25 +207,25 @@ npm run dev
 
 ```
 
-> Le serveur backend démarrera sur `http://localhost:5000`.
+> Le serveur écoutera sur `http://localhost:5000` (REST & WebSockets).
 
 ### 3. Démarrer le Frontend Mobile (Expo)
 
 ```bash
 cd ../frontend
 
-# Copier et configurer les variables d'environnement
+# Configurer les variables d'environnement
 cp .env.example .env
 
-# Installer les dépendances
+# Installer les dépendances (y compris socket.io-client)
 npm install
 
-# Lancer Expo Metro Bundler
+# Lancer Expo
 npx expo start
 
 ```
 
-> Scannez le QR Code affiché dans votre terminal avec l'application **Expo Go** (Android ou iOS).
+> Scannez le QR Code affiché dans votre terminal avec l'application **Expo Go**.
 
 ---
 
@@ -248,77 +252,42 @@ PINECONE_INDEX=travel-places
 
 ```env
 EXPO_PUBLIC_API_URL=http://VOTRE_IP_LOCALE:5000/api
+EXPO_PUBLIC_SOCKET_URL=http://VOTRE_IP_LOCALE:5000
 
 ```
 
-*(Remplacez `VOTRE_IP_LOCALE` par l'adresse IP locale de votre machine sur le réseau local, ex: `192.168.1.15`).*
+*(Remplacez `VOTRE_IP_LOCALE` par l'IP de votre machine locale, ex: `192.168.1.15`).*
 
 ---
 
-## 🐳 Docker
+## ⚡ Événements WebSockets (Socket.io)
 
-**Construire et démarrer les conteneurs :**
+L'échange entre l'application mobile et l'agent IA se fait en temps réel via des événements typés :
 
-```bash
-docker compose up --build -d
-
-```
-
-**Arrêter les conteneurs :**
-
-```bash
-docker compose down
-
-```
-
-**Afficher les logs en direct :**
-
-```bash
-docker compose logs -f
-
-```
-
----
-
-## 🔐 Authentification & Endpoints Clés
-
-### Authentification
-
-| Méthode | Point d'accès | Description |
+| Événement Client $\rightarrow$ Serveur | Paramètres | Rôle |
 | --- | --- | --- |
-| **POST** | `/api/auth/register` | Inscription d'un nouveau voyageur |
-| **POST** | `/api/auth/login` | Connexion et émission des tokens JWT |
+| `send_message` | `{ conversationId, content }` | Envoi d'un message utilisateur à l'agent |
+| `confirm_trip` | `{ conversationId, planId }` | Validation de la proposition de séjour |
+
+| Événement Serveur $\rightarrow$ Client | Paramètres | Rôle |
+| --- | --- | --- |
+| `agent_typing` | `{ isTyping: true/false }` | Indicateur visuel d'attente |
+| `agent_chunk` | `{ textChunk: String }` | Réception du texte token par token en streaming |
+| `trip_created` | `{ trip: Object }` | Notification dès qu'une action `createTrip` aboutit |
+| `error` | `{ message: String }` | Gestion d'erreur d'exécution ou refus de l'agent |
+
+---
+
+## 🔐 Endpoints REST Clés
+
+| Méthode | Route | Description |
+| --- | --- | --- |
+| **POST** | `/api/auth/register` | Inscription voyageur |
+| **POST** | `/api/auth/login` | Connexion et délivrance des tokens |
 | **POST** | `/api/auth/refresh` | Renouvellement du token d'accès |
-| **POST** | `/api/auth/logout` | Déconnexion et invalidation de session |
-
-### Lieux & Recommandations
-
-```http
-GET    /api/places
-GET    /api/places/:id
-POST   /api/places/search-vector       (Recherche vectorielle via Pinecone)
-
-```
-
-### Voyages & Itinéraires
-
-```http
-GET    /api/trips
-POST   /api/trips
-GET    /api/trips/:id
-PUT    /api/trips/:id
-DELETE /api/trips/:id
-
-```
-
-### Agent IA & Discussion
-
-```http
-POST   /api/ai/chat              (Chat standard)
-POST   /api/ai/chat/stream       (Flux de réponses SSE)
-GET    /api/ai/conversations     (Historique des échanges)
-
-```
+| **GET** | `/api/places` | Liste des lieux touristiques |
+| **GET** | `/api/trips` | Récupération des itinéraires de l'utilisateur |
+| **GET** | `/api/trips/:id` | Détail complet d'un voyage planifié |
 
 ---
 
@@ -326,39 +295,14 @@ GET    /api/ai/conversations     (Historique des échanges)
 
 L'assistant intelligent est habilité à :
 
-* Effectuer des recherches de similarité sémantique sur les descriptions des lieux indexées dans **Pinecone**.
-* Déclencher des fonctions métier spécifiques :
-* `searchPlaces(city, category, budget)` : Recherche de lieux filtrés par critères.
-* `createTrip(title, city, budget, days, plan_json)` : Persistance de l'itinéraire en base SQL.
+* Trouver des adresses pertinentes en interrogeant l'index vectoriel **Pinecone**.
+* Déclencher des fonctions métier via **Function Calling** :
+* `searchPlaces(city, category, budget)` : Récupère les données validées en SQL.
+* `createTrip(title, city, budget, days, plan_json)` : Génère le programme après confirmation WebSocket de l'utilisateur.
 
 
 * Répondre en langage naturel (français, darija, anglais).
-* Diffuser sa réponse en streaming temps réel via SSE (Server-Sent Events).
-* Refuser toute demande sortant du cadre du voyage (paiements bancaires directs, réservations de billets d'avion).
-* Exiger une confirmation explicite de l'utilisateur avant d'enregistrer des modifications en base de données.
-
----
-
-## 📬 Exemple de Conversation
-
-> 🧳 **Voyageur :**
-> *"J'ai 1 500 DH et je veux passer 3 jours à Marrakech."*
-
-> 🤖 **IA :**
-> *"Voici une proposition d'itinéraire sur 3 jours pour un budget estimé à 1 350 DH :*
-> * **Jour 1 :** Visite de la Koutoubia, déjeuner au Café des Épices, balade nocturne sur la place Jemaa el-Fna.
-> * **Jour 2 :** Jardin Majorelle, pause déjeuner chez Nomad, visite des souks de la Médina.
-> * **Jour 3 :** Palais de la Bahia, moment de détente dans un hammam traditionnel.
-> 
-> 
-> *Budget total estimé : 1 350 DH.*
-> **Souhaitez-vous que j'enregistre cet itinéraire dans votre compte ?**"
-
-> 🧳 **Voyageur :**
-> *"Oui, enregistre-le."*
-
-> 🤖 **IA :**
-> *"C'est fait ! Votre voyage 'Escapade de 3 jours à Marrakech' a été enregistré avec succès."*
+* Refuser les demandes hors périmètre (vols réels, paiements bancaires).
 
 ---
 
@@ -366,8 +310,8 @@ L'assistant intelligent est habilité à :
 
 Le développement de ce projet applique une démarche itérative assistée par IA :
 
-1. **Architecture First :** Spécification manuelle des modèles de données et des contrats d'interface (OpenAPI).
-2. **Prompts Itératifs :** Génération incrémentale par blocs fonctionnels courts (Middleware JWT, Endpoint SSE, Store Zustand).
+1. **Architecture First :** Spécification manuelle des modèles de données et contrats WebSocket/REST.
+2. **Prompts Itératifs :** Génération incrémentale par briques courtes (Passerelle Socket.io, Service Pinecone, Store Zustand).
 3. **Audit et Validation :** Chaque bloc généré est testé, documenté et vérifié avant intégration.
 4. **Journal de Bord :** Les prompts structurants, erreurs rencontrées et résolutions manuelles sont consignés dans `/docs/PROMPT_JOURNAL.md`.
 
