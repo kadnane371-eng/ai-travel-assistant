@@ -1,6 +1,3 @@
-Hawa le fichier **`README.md`** complet fih ga3 les sections (Frontend Mobile, Backend Express, Database PostgreSQL/pgvector, IA/RAG/Function Calling, Docker, w l-arborescence li fiha `class-diagram.puml`) m-nadmin w m-jmo3in f bloc wa7ed direct copier/coller :
-
-```markdown
 # ✈️ AI Travel Assistant — Plateforme Full-Stack
 
 Application mobile et API intelligente de planification de voyages au Maroc alimentées par l'IA 🇲🇦
