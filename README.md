@@ -40,10 +40,10 @@ L'application intègre un agent conversationnel autonome capable de répondre en
 | **Frontend Mobile** | React Native, Expo, Expo Router, Zustand, Axios, React Native Reanimated |
 | **Backend API** | Node.js, Express.js |
 | **Base de Données** | PostgreSQL normalisée (3NF) + extension vectorielle `pgvector` |
-| **ORM** | Sequelize / Prisma |
+| **ORM** | Sequelize |
 | **Authentification** | JWT (Access & Refresh) + bcrypt + Expo SecureStore |
 | **Moteur IA** | API OpenAI / Anthropic Claude (Function Calling, Embeddings, SSE) |
-| **Validation & Logs** | Zod / Express-validator, Winston, Morgan |
+| **Validation & Logs** | Zod / Express-validator,Morgan |
 | **DevOps & Tests** | Docker, Docker Compose, Postman |
 
 ---
