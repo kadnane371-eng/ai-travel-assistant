@@ -1,3 +1,6 @@
+Hawa le fichier **`README.md`** complet en français m-beddel fih `pgvector` b **Pinecone** (f la description, le tableau tech stack, l'arborescence, les variables d'environnement, w les fonctionnalités) :
+
+```markdown
 # ✈️ AI Travel Assistant — Plateforme Full-Stack
 
 Application mobile et API intelligente de planification de voyages au Maroc alimentées par l'IA 🇲🇦
@@ -8,11 +11,11 @@ Application mobile et API intelligente de planification de voyages au Maroc alim
 
 **AI Travel Assistant** est une solution complète (Mobile + Backend REST) conçue pour aider les voyageurs à découvrir, organiser et optimiser leurs séjours au Maroc (Marrakech, Fès, Tanger, etc.).
 
-L'application intègre un agent conversationnel autonome capable de répondre en direct grâce au **Streaming SSE**, de retrouver des spots précis par **recherche sémantique (RAG avec pgvector)** et de manipuler les données utilisateur via le **Function Calling**.
+L'application intègre un agent conversationnel autonome capable de répondre en direct grâce au **Streaming SSE**, de retrouver des spots précis par **recherche sémantique vectorielle via Pinecone** et de manipuler les données utilisateur via le **Function Calling**.
 
 ### 💡 Exemple d'utilisation :
 > **Voyageur :** *"J'ai 1 500 DH et je veux passer 3 jours à Marrakech. Je cherche des spots calmes et de la bonne cuisine locale."*  
-> **Assistant IA :** Interroge la base vectorielle, propose un planning structuré Jour 1 à Jour 3, et déclenche la création du voyage dans l'application après confirmation.
+> **Assistant IA :** Interroge l'index vectoriel Pinecone, propose un planning structuré Jour 1 à Jour 3, et déclenche la création du voyage dans l'application après confirmation.
 
 ---
 
@@ -24,8 +27,8 @@ L'application intègre un agent conversationnel autonome capable de répondre en
 - **Visualisation d'Itinéraire :** Cartes interactives par jour (Jour 1, Jour 2, etc.) avec activités, restaurants et budget estimé.
 - **Mode hors-ligne / Cache :** Persistance locale des voyages enregistrés avec `AsyncStorage`.
 
-### ⚙️ Backend & Agent IA (Express + PostgreSQL)
-- **Recherche sémantique (RAG) :** Découverte de lieux basée sur les embeddings stockés dans `pgvector`.
+### ⚙️ Backend & Agent IA (Express + PostgreSQL + Pinecone)
+- **Recherche sémantique (RAG) :** Découverte de lieux basée sur les embeddings stockés et indexés dans **Pinecone**.
 - **Appel d'outils (Function Calling) :**
   - `searchPlaces(city, category, budget)` : Récupère les données fiables de la base SQL.
   - `createTrip(title, city, budget, days, plan_json)` : Sauvegarde le voyage validé en base.
@@ -39,11 +42,12 @@ L'application intègre un agent conversationnel autonome capable de répondre en
 | :--- | :--- |
 | **Frontend Mobile** | React Native, Expo, Expo Router, Zustand, Axios, React Native Reanimated |
 | **Backend API** | Node.js, Express.js |
-| **Base de Données** | PostgreSQL normalisée (3NF) + extension vectorielle `pgvector` |
-| **ORM** | Sequelize |
+| **Base Relationnelle** | PostgreSQL normalisée (3NF) |
+| **Base Vectorielle** | Pinecone (Serverless Vector Index) |
+| **ORM** | Sequelize|
 | **Authentification** | JWT (Access & Refresh) + bcrypt + Expo SecureStore |
 | **Moteur IA** | API OpenAI / Anthropic Claude (Function Calling, Embeddings, SSE) |
-| **Validation & Logs** | Zod / Express-validator,Morgan |
+| **Validation & Logs** | Zod / Express-validator, Morgan |
 | **DevOps & Tests** | Docker, Docker Compose, Postman |
 
 ---
@@ -57,6 +61,7 @@ ai-travel-assistant/
 │   ├── src/
 │   │   ├── config/
 │   │   │   ├── database.js
+│   │   │   ├── pinecone.js           # Client et configuration d'index Pinecone
 │   │   │   ├── ai.js
 │   │   │   └── env.js
 │   │   │
@@ -92,6 +97,7 @@ ai-travel-assistant/
 │   │   │   ├── auth.service.js
 │   │   │   ├── trip.service.js
 │   │   │   ├── rag.service.js
+│   │   │   ├── pinecone.service.js   # Requêtes upsert et query vers Pinecone
 │   │   │   └── ai.service.js
 │   │   │
 │   │   ├── validators/
@@ -184,7 +190,7 @@ cd backend
 # Copier et configurer les variables d'environnement
 cp .env.example .env
 
-# Lancer la base PostgreSQL avec pgvector via Docker
+# Lancer la base PostgreSQL via Docker
 docker compose up -d db
 
 # Installer les dépendances
@@ -235,6 +241,8 @@ DB_PASSWORD=motdepasse
 JWT_SECRET=votre_cle_jwt_secrete
 JWT_REFRESH_SECRET=votre_cle_refresh_secrete
 OPENAI_API_KEY=votre_cle_openai
+PINECONE_API_KEY=votre_cle_pinecone
+PINECONE_INDEX=travel-places
 
 ```
 
@@ -290,7 +298,7 @@ docker compose logs -f
 ```http
 GET    /api/places
 GET    /api/places/:id
-POST   /api/places/search-vector
+POST   /api/places/search-vector       (Recherche vectorielle via Pinecone)
 
 ```
 
@@ -320,10 +328,10 @@ GET    /api/ai/conversations     (Historique des échanges)
 
 L'assistant intelligent est habilité à :
 
-* Effectuer des recherches de similarité vectorielle sur les lieux répertoriés via `pgvector`.
+* Effectuer des recherches de similarité sémantique sur les descriptions des lieux indexées dans **Pinecone**.
 * Déclencher des fonctions métier spécifiques :
 * `searchPlaces(city, category, budget)` : Recherche de lieux filtrés par critères.
-* `createTrip(title, city, budget, days, plan_json)` : Persistance de l'itinéraire en base.
+* `createTrip(title, city, budget, days, plan_json)` : Persistance de l'itinéraire en base SQL.
 
 
 * Répondre en langage naturel (français, darija, anglais).
