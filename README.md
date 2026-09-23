@@ -1,6 +1,4 @@
-Hawa le fichier **`README.md`** complet en français m-beddel fih `pgvector` b **Pinecone** (f la description, le tableau tech stack, l'arborescence, les variables d'environnement, w les fonctionnalités) :
 
-```markdown
 # ✈️ AI Travel Assistant — Plateforme Full-Stack
 
 Application mobile et API intelligente de planification de voyages au Maroc alimentées par l'IA 🇲🇦
