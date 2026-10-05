@@ -1,0 +1,17 @@
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: ai_travel_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ai_travel_assistant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5433:5432"
+    volumes:
+      - ai_travel_data:/var/lib/postgresql/data
+
+volumes:
+  ai_travel_data:
