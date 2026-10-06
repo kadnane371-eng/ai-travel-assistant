@@ -1,44 +1,43 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
-const Trip = sequelize.define(
-  "Trip",
+const TripItem = sequelize.define(
+  "TripItem",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    userId: {
+    tripDayId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    placeId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    timeSlot: {
+      type: DataTypes.ENUM("morning", "afternoon", "evening"),
+      defaultValue: "morning",
     },
     title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    city: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
-    budgetTotalDh: {
+    costDh: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
       defaultValue: 0,
-    },
-    daysCount: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1,
-    },
-    status: {
-      type: DataTypes.ENUM("draft", "confirmed", "completed"),
-      defaultValue: "confirmed",
     },
   },
   {
-    tableName: "trips",
+    tableName: "trip_items",
     timestamps: true,
   }
 );
 
-export default Trip;
+export default TripItem;

@@ -6,17 +6,24 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "seed": "node src/seeders/seed.js",
+    "seed:pinecone": "node src/seeders/seed-pinecone.js"
   },
   "dependencies": {
+    "@pinecone-database/pinecone": "^9.0.0",
+    "@scalar/express-api-reference": "^0.10.27",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.12.1",
+    "openai": "^7.28.0",
     "pg": "^8.23.1",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.8"
+    "sequelize": "^6.37.8",
+    "socket.io": "^4.8.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

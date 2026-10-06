@@ -42,10 +42,10 @@ L'application intègre un agent conversationnel autonome capable d'interagir en 
 | **Frontend Mobile** | React Native, Expo, Expo Router, Zustand, Socket.io-client, Axios |
 | **Backend API & Realtime** | Node.js, Express.js, Socket.io (WebSockets) |
 | **Base Relationnelle** | PostgreSQL normalisée (3NF) |
-| **Base Vectorielle** | Pinecone (Serverless Vector Index) |
+| **Base Vectorielle** | Pinecone (Inference API: llama-text-embed-v2, 1024 dimensions, NVIDIA) |
 | **ORM** | Sequelize  |
 | **Authentification** | JWT (Handshake WebSocket & REST) + bcrypt + Expo SecureStore |
-| **Moteur IA** | API OpenAI / Anthropic Claude (Function Calling, Embeddings, Token Streaming) |
+| **Moteur IA** | API DeepSeek (deepseek-chat, Function Calling, Token Streaming) |
 | **Validation & Logs** | Zod / Express-validator, Morgan |
 | **DevOps & Tests** | Docker, Docker Compose, Postman |
 
@@ -207,7 +207,9 @@ npm run dev
 
 ```
 
-> Le serveur écoutera sur `http://localhost:5000` (REST & WebSockets).
+> Le serveur écoutera sur `http://localhost:5000` (REST & WebSockets).  
+> 📚 **Documentation interactive Scalar UI :** `http://localhost:5000/docs` ou `http://localhost:5000/reference`  
+> 📄 **Spécification OpenAPI JSON :** `http://localhost:5000/openapi.json`
 
 ### 3. Démarrer le Frontend Mobile (Expo)
 
@@ -242,7 +244,8 @@ DB_USER=postgres
 DB_PASSWORD=motdepasse
 JWT_SECRET=votre_cle_jwt_secrete
 JWT_REFRESH_SECRET=votre_cle_refresh_secrete
-OPENAI_API_KEY=votre_cle_openai
+DEEPSEEK_API_KEY=votre_cle_deepseek
+DEEPSEEK_MODEL=deepseek-chat
 PINECONE_API_KEY=votre_cle_pinecone
 PINECONE_INDEX=travel-places
 

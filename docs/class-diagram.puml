@@ -1,0 +1,96 @@
+@startuml AI_Travel_Assistant_Class_Diagram
+
+title Diagramme de Classes - AI Travel Assistant 🇲🇦
+
+entity User {
+  * id : Integer <<PK>>
+  --
+  * fullName : String
+  * email : String <<Unique>>
+  * password : String
+  refreshToken : Text
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity Trip {
+  * id : Integer <<PK>>
+  --
+  * userId : Integer <<FK>>
+  * title : String
+  * city : String
+  * budgetTotalDh : Decimal
+  daysCount : Integer
+  status : Enum("draft", "confirmed", "completed")
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity TripDay {
+  * id : Integer <<PK>>
+  --
+  * tripId : Integer <<FK>>
+  * dayNumber : Integer
+  * title : String
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity TripItem {
+  * id : Integer <<PK>>
+  --
+  * tripDayId : Integer <<FK>>
+  placeId : Integer <<FK>>
+  timeSlot : Enum("morning", "afternoon", "evening")
+  * title : String
+  description : Text
+  costDh : Decimal
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity Place {
+  * id : Integer <<PK>>
+  --
+  * name : String
+  * city : String
+  * category : String
+  * description : Text
+  budgetLevel : Enum("low", "medium", "high")
+  estimatedPriceDh : Decimal
+  imageUrl : String
+  latitude : Float
+  longitude : Float
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity Conversation {
+  * id : Integer <<PK>>
+  --
+  * userId : Integer <<FK>>
+  * title : String
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity Message {
+  * id : Integer <<PK>>
+  --
+  * conversationId : Integer <<FK>>
+  * sender : Enum("user", "assistant")
+  * content : Text
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+' Relations
+User "1" --> "0..*" Trip : planifie >
+Trip "1" *--> "1..*" TripDay : est composé de >
+TripDay "1" *--> "1..*" TripItem : organise >
+Place "1" <-- "0..*" TripItem : référence >
+
+User "1" --> "0..*" Conversation : échange via >
+Conversation "1" *--> "1..*" Message : contient >
+
+@enduml
