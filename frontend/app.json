@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "TravelAI",
+    "slug": "travelai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "travelai",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#0D5C4D"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D5C4D",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ]
+  }
+}

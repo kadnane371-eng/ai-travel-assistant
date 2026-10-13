@@ -87,6 +87,31 @@ Ce document consigne la démarche itérative de co-développement assisté par I
 
 ---
 
+### Itération 8 : Développement du Frontend Mobile (React Native / Expo) & Connexion Temps Réel
+- **Prompt :**
+  > *"À partir du brief, du README et des maquettes d'écran, développe l'application mobile frontend (React Native, Expo Router, Zustand, Axios, Socket.io) et connecte-la au backend REST et WebSockets."*
+- **Résultat Obtenu :**
+  - Architecture complète sous `frontend/` avec 9 écrans fidèles aux maquettes visuelles :
+    1. **Onboarding / Splash** (`app/index.jsx`) avec fond paysager marocain et bouton "Commencer".
+    2. **Connexion & Inscription** (`app/(auth)/login.jsx`, `app/(auth)/register.jsx`) avec mot de passe masquable et stockage chiffré des tokens.
+    3. **Accueil** (`app/(tabs)/index.jsx`) avec salutation personnalisée, bannière IA et carrousel de destinations (Marrakech, Agadir, Fès).
+    4. **Planificateur de voyage** (`app/plan.jsx`) avec sélecteurs de ville, durée, budget en DH, style de voyage et nombre de voyageurs.
+    5. **Itinéraire détaillé** (`app/trip/[id].jsx`) avec timeline chronologique reliée, badges budgétaires et onglets Jour 1/2/3.
+    6. **Chat IA interactif** (`app/(tabs)/chat.jsx`) avec streaming token par token, statut en ligne, et cartes d'activités riches.
+    7. **Exploration des lieux** (`app/(tabs)/explore.jsx`) avec filtres catégories (Lieux, Restaurants, Activités) et recherche.
+    8. **Mes voyages** (`app/(tabs)/trips.jsx`) avec onglets À venir/Passés et actions (Voir, Modifier, Partager, Supprimer).
+    9. **Profil utilisateur** (`app/(tabs)/profile.jsx`) avec informations du compte et déconnexion sécurisée.
+  - Gestion d'état modulaire avec Zustand (`authStore.js`, `chatStore.js`, `tripStore.js`).
+  - Passerelle Socket.io (`services/socket.js`) gérant le handshake JWT, l'indicateur d'écriture et le streaming en direct.
+  - Client Axios centralisé (`services/api.js`) avec intercepteur d'injection JWT et refresh automatique en cas d'expiration.
+  - Stockage chiffré hybride (`utils/secureStore.js`) via `Expo SecureStore` sur mobile natif et fallback `AsyncStorage` pour le web.
+- **Revue & Correction Manuelle :**
+  - Respect scrupuleux de la palette de couleurs et tokens du design (Émeraude marocain `#0D5C4D`, Terracotta `#E07A5F`, Sable `#E9C46A`).
+  - Ajout du middleware `cors` dans le backend Express pour autoriser les requêtes cross-origin du frontend.
+  - Fallbacks gracieux et données de démonstration permettant à l'application de fonctionner de manière fluide même sans réseau ou sans base active.
+
+---
+
 ## 🎯 Préparation aux Questions de Soutenance
 - **Q : Pourquoi avoir séparé AccessToken et RefreshToken ?**  
   *R :* L'AccessToken a une durée de vie courte (1 jour) pour limiter l'impact en cas d'interception. Le RefreshToken (7 jours) permet de renouveler la session en arrière-plan sans forcer l'utilisateur à se reconnecter.
@@ -94,3 +119,6 @@ Ce document consigne la démarche itérative de co-développement assisté par I
   *R :* Grâce au RAG : avant de répondre, le service injecte les lieux réels et prix vérifiés de la base de données dans le prompt système (`rag.service.js`).
 - **Q : Pourquoi exiger une confirmation humaine avant de créer le voyage ?**  
   *R :* Principe de *Human-in-the-Loop* : l'agent propose, mais l'utilisateur reste maître de la validation de ses données financières et d'itinéraire.
+- **Q : Comment est géré le streaming de texte entre l'IA et le mobile ?**  
+  *R :* L'agent diffuse les tokens via WebSockets (`socket.io` événement `agent_chunk`), ce qui permet au composant React Native d'afficher les mots au fur et à mesure sans attendre la complétion totale.
+
