@@ -8,12 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../src/constants/colors";
-import { theme } from "../../src/constants/theme";
 import CustomButton from "../../src/components/CustomButton";
 import { useAuthStore } from "../../src/stores/authStore";
 
@@ -45,184 +44,150 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    Alert.alert(
-      "Connexion Google",
-      "Mode démo : utilisation des identifiants par défaut pour se connecter rapidement.",
-      [
-        {
-          text: "Se connecter en Démo",
-          onPress: () => {
-            setEmail("anas@example.com");
-            setPassword("password123");
-            handleLogin();
-          },
-        },
-        { text: "Annuler", style: "cancel" },
-      ]
-    );
-  };
-
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
       >
-        {/* En-tête Logo */}
-        <View style={styles.header}>
-          <View style={styles.logoRow}>
-            <View style={styles.iconBox}>
-              <Ionicons name="airplane" size={28} color={colors.primary} />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* En-tête Logo */}
+          <View style={styles.header}>
+            <View style={styles.logoRow}>
+              <View style={styles.iconBox}>
+                <Ionicons name="airplane" size={28} color={colors.primary} />
+              </View>
+              <Text style={styles.logoTitle}>TravelAI</Text>
             </View>
-            <Text style={styles.logoTitle}>TravelAI</Text>
-          </View>
-          <Text style={styles.title}>Bon retour !</Text>
-          <Text style={styles.subtitle}>
-            Connectez-vous pour continuer votre voyage
-          </Text>
-        </View>
-
-        {/* Message d'erreur s'il y a lieu */}
-        {(localError || storeError) ? (
-          <View style={styles.errorBox}>
-            <Ionicons name="alert-circle-outline" size={18} color={colors.danger} />
-            <Text style={styles.errorText}>{localError || storeError}</Text>
-          </View>
-        ) : null}
-
-        {/* Formulaire */}
-        <View style={styles.form}>
-          {/* Champ Email */}
-          <View style={styles.inputWrapper}>
-            <Ionicons
-              name="person-outline"
-              size={20}
-              color={colors.textLight}
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Email ou numéro de téléphone"
-              placeholderTextColor={colors.textLight}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
+            <Text style={styles.title}>Bon retour !</Text>
+            <Text style={styles.subtitle}>
+              Connectez-vous pour continuer votre voyage
+            </Text>
           </View>
 
-          {/* Champ Mot de passe */}
-          <View style={styles.inputWrapper}>
-            <Ionicons
-              name="lock-closed-outline"
-              size={20}
-              color={colors.textLight}
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Mot de passe"
-              placeholderTextColor={colors.textLight}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeBtn}
-            >
+          {/* Message d'erreur s'il y a lieu */}
+          {(localError || storeError) ? (
+            <View style={styles.errorBox}>
+              <Ionicons name="alert-circle-outline" size={18} color={colors.danger} />
+              <Text style={styles.errorText}>{localError || storeError}</Text>
+            </View>
+          ) : null}
+
+          {/* Formulaire */}
+          <View style={styles.form}>
+            {/* Champ Email */}
+            <View style={styles.inputWrapper}>
               <Ionicons
-                name={showPassword ? "eye-outline" : "eye-off-outline"}
+                name="person-outline"
                 size={20}
                 color={colors.textLight}
+                style={styles.inputIcon}
               />
-            </TouchableOpacity>
-          </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Email ou numéro de téléphone"
+                placeholderTextColor={colors.textLight}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
 
-          {/* Se souvenir de moi */}
-          <View style={styles.rememberRow}>
-            <TouchableOpacity
-              style={styles.rememberCheckbox}
-              onPress={() => setRememberMe(!rememberMe)}
-              activeOpacity={0.8}
-            >
-              <View
-                style={[
-                  styles.checkboxBox,
-                  rememberMe && styles.checkboxBoxChecked,
-                ]}
+            {/* Champ Mot de passe */}
+            <View style={styles.inputWrapper}>
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={colors.textLight}
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Mot de passe"
+                placeholderTextColor={colors.textLight}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeBtn}
               >
-                {rememberMe && (
-                  <Ionicons name="checkmark" size={14} color="#FFFFFF" />
-                )}
-              </View>
-              <Text style={styles.rememberText}>Se souvenir de moi</Text>
-            </TouchableOpacity>
+                <Ionicons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={20}
+                  color={colors.textLight}
+                />
+              </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity>
-              <Text style={styles.forgotText}>Mot de passe oublié ?</Text>
-            </TouchableOpacity>
+            {/* Se souvenir de moi */}
+            <View style={styles.rememberRow}>
+              <TouchableOpacity
+                style={styles.rememberCheckbox}
+                onPress={() => setRememberMe(!rememberMe)}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.checkboxBox,
+                    rememberMe && styles.checkboxBoxChecked,
+                  ]}
+                >
+                  {rememberMe && (
+                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                  )}
+                </View>
+                <Text style={styles.rememberText}>Se souvenir de moi</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Bouton Se connecter */}
+            <CustomButton
+              title="Se connecter"
+              onPress={handleLogin}
+              loading={isLoading}
+              size="lg"
+              style={styles.submitButton}
+            />
           </View>
 
-          {/* Bouton Se connecter */}
-          <CustomButton
-            title="Se connecter"
-            onPress={handleLogin}
-            loading={isLoading}
-            size="lg"
-            style={styles.submitButton}
-          />
-
-          {/* Séparateur OU */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OU</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Bouton Google */}
-          <CustomButton
-            title="Continuer avec Google"
-            onPress={handleGoogleLogin}
-            variant="google"
-            size="md"
-            icon={
-              <Ionicons name="logo-google" size={18} color="#EA4335" />
-            }
-          />
-        </View>
-
-        {/* Footer Inscription */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Vous n'avez pas de compte ?{" "}
-            <Text
-              style={styles.footerLink}
-              onPress={() => router.push("/(auth)/register")}
-            >
-              S'inscrire
+          {/* Footer Inscription */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              Vous n'avez pas de compte ?{" "}
+              <Text
+                style={styles.footerLink}
+                onPress={() => router.push("/(auth)/register")}
+              >
+                S'inscrire
+              </Text>
             </Text>
-          </Text>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
   scrollContent: {
     paddingHorizontal: 28,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingTop: 16,
+    paddingBottom: 20,
     flexGrow: 1,
     justifyContent: "space-between",
   },
@@ -279,7 +244,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: 16,
-    height: 54,
+    height: 56,
     marginBottom: 16,
   },
   inputIcon: {
@@ -287,16 +252,17 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    height: "100%",
     fontSize: 15,
     color: colors.text,
   },
   eyeBtn: {
-    padding: 6,
+    padding: 8,
   },
   rememberRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 24,
     marginTop: 4,
   },
@@ -309,10 +275,11 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: colors.textLight,
+    borderColor: colors.border,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,
+    backgroundColor: "#FFFFFF",
   },
   checkboxBoxChecked: {
     backgroundColor: colors.primary,
@@ -322,30 +289,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
   },
-  forgotText: {
-    fontSize: 13,
-    color: colors.primary,
-    fontWeight: "500",
-  },
   submitButton: {
     width: "100%",
-    marginBottom: 20,
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 18,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.borderLight,
-  },
-  dividerText: {
-    marginHorizontal: 14,
-    fontSize: 12,
-    color: colors.textLight,
-    fontWeight: "600",
+    marginTop: 8,
   },
   footer: {
     alignItems: "center",

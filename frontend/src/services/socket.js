@@ -1,7 +1,25 @@
 import { io } from "socket.io-client";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
 import secureStorage from "../utils/secureStore";
 
-const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || "http://localhost:5000";
+const getSocketUrl = () => {
+  if (process.env.EXPO_PUBLIC_SOCKET_URL) {
+    return process.env.EXPO_PUBLIC_SOCKET_URL;
+  }
+  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  if (hostUri) {
+    const ip = hostUri.split(":")[0];
+    return `http://${ip}:5000`;
+  }
+  if (Platform.OS === "android") {
+    return "http://10.0.2.2:5000";
+  }
+  return "http://localhost:5000";
+};
+
+const SOCKET_URL = getSocketUrl();
+console.log("⚡ [TravelAI Socket] Connecté à :", SOCKET_URL);
 
 let socketInstance = null;
 

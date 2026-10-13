@@ -7,20 +7,22 @@ import {
   TextInput,
   Image,
   TouchableOpacity,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../src/constants/colors";
 import { theme } from "../../src/constants/theme";
 import { useAuthStore } from "../../src/stores/authStore";
 
+const marrakechAsset = require("../../assets/marrakech.jpg");
+
 const popularDestinations = [
   {
     id: "marrakech",
     name: "Marrakech",
     subtitle: "Ville Ocre & Palais",
-    image: "https://images.unsplash.com/photo-1548013146-72479768bada?w=700&q=80",
+    image: marrakechAsset,
     days: "3-5 jours",
   },
   {
@@ -51,10 +53,10 @@ export default function HomeScreen() {
   const user = useAuthStore((state) => state.user);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const firstName = user?.fullName ? user.fullName.split(" ")[0] : "Sarah";
+  const firstName = user?.fullName ? user.fullName.split(" ")[0] : "Voyageur";
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -114,6 +116,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
+
         {/* Section Destinations Populaires */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Destinations populaires</Text>
@@ -135,7 +138,11 @@ export default function HomeScreen() {
               style={styles.destinationCard}
               onPress={() => router.push(`/plan?city=${dest.name}`)}
             >
-              <Image source={{ uri: dest.image }} style={styles.destinationImage} />
+              <Image
+                source={typeof dest.image === "string" ? { uri: dest.image } : dest.image}
+                style={styles.destinationImage}
+                resizeMode="cover"
+              />
               <View style={styles.destinationBadge}>
                 <Text style={styles.destinationBadgeText}>{dest.days}</Text>
               </View>

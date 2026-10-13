@@ -6,10 +6,10 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../src/constants/colors";
@@ -112,6 +112,7 @@ const mockTripFallback = {
 
 export default function TripDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   const fetchTripDetails = useTripStore((state) => state.fetchTripDetails);
   const currentTrip = useTripStore((state) => state.currentTrip);
@@ -168,7 +169,7 @@ export default function TripDetailScreen() {
           <View style={styles.heroOverlay} />
 
           {/* Bouton retour */}
-          <SafeAreaView style={styles.headerButtons}>
+          <View style={[styles.headerButtons, { paddingTop: insets.top + 10 }]}>
             <TouchableOpacity onPress={() => router.back()} style={styles.circleBtn}>
               <Ionicons name="chevron-back" size={22} color={colors.text} />
             </TouchableOpacity>
@@ -179,7 +180,7 @@ export default function TripDetailScreen() {
             >
               <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.primary} />
             </TouchableOpacity>
-          </SafeAreaView>
+          </View>
 
           {/* Titre et Badges sur l'image */}
           <View style={styles.heroContent}>
@@ -227,7 +228,12 @@ export default function TripDetailScreen() {
       </ScrollView>
 
       {/* Barre d'action sticky en bas */}
-      <View style={styles.stickyFooter}>
+      <View
+        style={[
+          styles.stickyFooter,
+          { paddingBottom: insets.bottom > 0 ? insets.bottom + 8 : 14 },
+        ]}
+      >
         <CustomButton
           title="Sauvegarder ce voyage"
           onPress={handleSaveTrip}
@@ -246,7 +252,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 110,
   },
   heroContainer: {
     height: 280,

@@ -1,7 +1,25 @@
 import axios from "axios";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
 import secureStorage from "../utils/secureStore";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:5000/api";
+const getApiUrl = () => {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  if (hostUri) {
+    const ip = hostUri.split(":")[0];
+    return `http://${ip}:5000/api`;
+  }
+  if (Platform.OS === "android") {
+    return "http://10.0.2.2:5000/api";
+  }
+  return "http://localhost:5000/api";
+};
+
+const API_URL = getApiUrl();
+console.log("🌐 [TravelAI API] Connecté à :", API_URL);
 
 const api = axios.create({
   baseURL: API_URL,

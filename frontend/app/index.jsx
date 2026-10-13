@@ -9,15 +9,18 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../src/constants/colors";
 import { theme } from "../src/constants/theme";
 import CustomButton from "../src/components/CustomButton";
 import { useAuthStore } from "../src/stores/authStore";
 
+const marrakechBg = require("../assets/marrakech.jpg");
 const { height } = Dimensions.get("window");
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const handleStart = () => {
@@ -31,23 +34,29 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={{
-          uri: "https://images.unsplash.com/photo-1548013146-72479768bada?w=1200&q=85",
-        }}
+        source={marrakechBg}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
         {/* Dégradé d'assombrissement pour lisibilité optimale */}
         <View style={styles.overlay} />
 
-        <View style={styles.content}>
+        <View
+          style={[
+            styles.content,
+            {
+              paddingTop: Math.max(insets.top + 20, height * 0.08),
+              paddingBottom: Math.max(insets.bottom + 16, 32),
+            },
+          ]}
+        >
           {/* Logo et Slogan */}
           <View style={styles.logoContainer}>
             <View style={styles.logoIconCircle}>
               <Ionicons name="airplane" size={36} color="#FFFFFF" />
             </View>
             <Text style={styles.logoText}>TravelAI</Text>
-            <Text style={styles.tagline}>Your smart travel companion</Text>
+            <Text style={styles.tagline}>Votre compagnon de voyage intelligent</Text>
           </View>
 
           {/* Boutons d'action */}
@@ -69,14 +78,6 @@ export default function WelcomeScreen() {
                 <Text style={styles.loginLinkHighlight}>Se connecter</Text>
               </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => router.replace("/(tabs)")}
-              style={styles.guestLink}
-            >
-              <Text style={styles.guestText}>Explorer sans compte →</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ImageBackground>
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(8, 60, 50, 0.45)",
+    backgroundColor: "rgba(8, 25, 20, 0.35)",
   },
   content: {
     flex: 1,
@@ -153,13 +154,5 @@ const styles = StyleSheet.create({
   loginLinkHighlight: {
     fontWeight: "700",
     textDecorationLine: "underline",
-  },
-  guestLink: {
-    marginTop: 12,
-    paddingVertical: 4,
-  },
-  guestText: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: 13,
   },
 });

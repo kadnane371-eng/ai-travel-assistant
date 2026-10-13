@@ -6,9 +6,9 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../src/constants/colors";
@@ -18,10 +18,6 @@ import { useAuthStore } from "../../src/stores/authStore";
 
 const menuItems = [
   { id: "trips", title: "Mes voyages", icon: "book-outline", route: "/(tabs)/trips" },
-  { id: "favorites", title: "Favoris", icon: "heart-outline", route: "/(tabs)/explore" },
-  { id: "notifications", title: "Notifications", icon: "notifications-outline" },
-  { id: "settings", title: "Paramètres", icon: "settings-outline" },
-  { id: "help", title: "Aide & support", icon: "help-circle-outline" },
 ];
 
 export default function ProfileScreen() {
@@ -42,18 +38,15 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const displayName = user?.fullName || "Sarah El Idrissi";
-  const displayEmail = user?.email || "sarah@email.com";
+  const displayName = user?.fullName || (isAuthenticated ? "Voyageur" : "Invité");
+  const displayEmail = user?.email || (isAuthenticated ? "" : "Non connecté");
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* En-tête avec bouton paramètres */}
+        {/* En-tête */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Mon profil</Text>
-          <TouchableOpacity style={styles.settingsBtn}>
-            <Ionicons name="settings-outline" size={22} color={colors.text} />
-          </TouchableOpacity>
         </View>
 
         {/* Bloc utilisateur : Avatar, Nom, Email */}
@@ -130,12 +123,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     color: colors.text,
-  },
-  settingsBtn: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
   },
   userCard: {
     alignItems: "center",
