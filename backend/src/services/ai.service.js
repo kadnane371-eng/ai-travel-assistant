@@ -114,6 +114,40 @@ export const executeFunctionCall = async (toolName, args, userId) => {
 };
 
 /**
+ * Traiter un message sans streaming (HTTP REST)
+ * @param {string} userMessage - Message envoyé par l'utilisateur
+ * @param {number} userId - ID de l'utilisateur connecté
+ */
+export const processChatMessage = async (userMessage, userId) => {
+  const ragContext = await getContextForQuery(userMessage);
+
+  if (deepseek) {
+    try {
+      const response = await deepseek.chat.completions.create({
+        model: DEEPSEEK_MODEL,
+        messages: [
+          { role: "system", content: `${SYSTEM_PROMPT}\n\nContexte documentaire fiable :\n${ragContext}` },
+          { role: "user", content: userMessage },
+        ],
+        stream: false,
+      });
+
+      return response.choices[0]?.message?.content || "";
+    } catch (err) {
+      console.warn("Erreur API DeepSeek, bascule vers le moteur local:", err.message);
+    }
+  }
+
+  // Moteur local de simulation intelligente
+  const simulatedAnswer = `Salam ! Je suis votre assistant DeepSeek pour votre voyage au Maroc :\n\n` +
+    `📍 **Recommandation basée sur nos données :**\n${ragContext}\n\n` +
+    `💡 **Conseil budget :** Prévoyez environ 300 à 500 DH/jour pour les repas et visites.\n` +
+    `Souhaitez-vous que je crée et sauvegarde cet itinéraire dans votre compte ?`;
+
+  return simulatedAnswer;
+};
+
+/**
  * Traiter un message avec streaming via DeepSeek
  * @param {string} userMessage - Message envoyé par l'utilisateur
  * @param {number} userId - ID de l'utilisateur connecté
@@ -139,7 +173,7 @@ export const processChatMessageStream = async (userMessage, userId, onChunk) => 
         const text = chunk.choices[0]?.delta?.content || "";
         if (text) {
           fullResponse += text;
-          onChunk(text);
+          if (typeof onChunk === "function") onChunk(text);
         }
       }
       return fullResponse;
@@ -157,7 +191,7 @@ export const processChatMessageStream = async (userMessage, userId, onChunk) => 
   const words = simulatedAnswer.split(" ");
   for (const word of words) {
     await new Promise((resolve) => setTimeout(resolve, 40));
-    onChunk(word + " ");
+    if (typeof onChunk === "function") onChunk(word + " ");
   }
 
   return simulatedAnswer;

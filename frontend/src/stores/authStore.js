@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import secureStorage from "../utils/secureStore";
 import authApi from "../services/auth.api";
-import { initSocket, disconnectSocket } from "../services/socket";
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -29,7 +28,6 @@ export const useAuthStore = create((set, get) => ({
               isAuthenticated: true,
               isLoading: false,
             });
-            await initSocket();
             return;
           }
         } catch (e) {
@@ -71,13 +69,15 @@ export const useAuthStore = create((set, get) => ({
         error: null,
       });
 
-      await initSocket();
       return { success: true };
     } catch (err) {
+      console.error("Erreur login:", err);
       const message =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        "Identifiants invalides ou problème de connexion.";
+        (err.code === "ECONNABORTED" || !err.response
+          ? "Impossible de contacter le serveur (vérifiez l'IP ou le Wi-Fi)."
+          : err.message || "Identifiants invalides ou problème de connexion.");
       set({ isLoading: false, error: message });
       return { success: false, error: message };
     }
@@ -104,13 +104,15 @@ export const useAuthStore = create((set, get) => ({
         error: null,
       });
 
-      await initSocket();
       return { success: true };
     } catch (err) {
+      console.error("Erreur register:", err);
       const message =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        "Erreur lors de l'inscription.";
+        (err.code === "ECONNABORTED" || !err.response
+          ? "Impossible de contacter le serveur (vérifiez l'IP ou le Wi-Fi)."
+          : err.message || "Erreur lors de l'inscription.");
       set({ isLoading: false, error: message });
       return { success: false, error: message };
     }
@@ -126,7 +128,6 @@ export const useAuthStore = create((set, get) => ({
     } finally {
       await secureStorage.removeItem("access_token");
       await secureStorage.removeItem("refresh_token");
-      disconnectSocket();
       set({
         user: null,
         accessToken: null,

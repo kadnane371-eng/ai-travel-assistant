@@ -3,9 +3,6 @@ import { User } from "../models/index.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "travel_assistant_super_jwt_secret_key_2026";
 
-/**
- * Middleware pour sécuriser les routes avec un token JWT
- */
 export const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -31,7 +28,6 @@ export const authMiddleware = async (req, res, next) => {
       });
     }
 
-    // On attache l'utilisateur à la requête
     req.user = user;
     next();
   } catch (error) {

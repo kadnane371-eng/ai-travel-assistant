@@ -129,7 +129,6 @@ const runSeed = async () => {
     console.log("🌱 Début du remplissage de la base de données...");
     await sequelize.sync({ force: true });
 
-    // 1. Créer un utilisateur de démonstration
     const hashedPassword = await bcrypt.hash("password123", 10);
     const demoUser = await User.create({
       fullName: "Anas El Amrani",
@@ -138,11 +137,9 @@ const runSeed = async () => {
     });
     console.log("👤 Utilisateur test créé : anas@example.com / password123");
 
-    // 2. Insérer les lieux du Maroc
     const createdPlaces = await Place.bulkCreate(initialPlaces);
     console.log(`📍 ${createdPlaces.length} lieux marocains insérés avec succès.`);
 
-    // 3. Créer un voyage de démonstration
     const sampleTrip = await Trip.create({
       userId: demoUser.id,
       title: "Week-end Culturel à Marrakech",
@@ -175,7 +172,6 @@ const runSeed = async () => {
       },
     ]);
 
-    // 4. Indexation vectorielle dans Pinecone si configuré
     if (process.env.PINECONE_API_KEY) {
       console.log("🌲 Indexation vectorielle dans Pinecone (modèle llama-text-embed-v2 1024-dim)...");
       const { upsertPlaceEmbedding } = await import("../services/pinecone.service.js");

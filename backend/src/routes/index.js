@@ -2,6 +2,7 @@ import { Router } from "express";
 import authRoutes from "./auth.routes.js";
 import placeRoutes from "./place.routes.js";
 import tripRoutes from "./trip.routes.js";
+import chatRoutes from "./chat.routes.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import { Conversation, Message } from "../models/index.js";
 
@@ -16,7 +17,10 @@ router.use("/places", placeRoutes);
 // 3. Voyages et itinéraires
 router.use("/trips", tripRoutes);
 
-// 4. Historique des conversations de chat (protégé)
+// 4. Chat avec l'IA
+router.use("/chat", chatRoutes);
+
+// 5. Historique des conversations de chat (protégé)
 router.get("/conversations", authMiddleware, async (req, res, next) => {
   try {
     const conversations = await Conversation.findAll({

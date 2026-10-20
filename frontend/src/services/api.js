@@ -4,13 +4,13 @@ import { Platform } from "react-native";
 import secureStorage from "../utils/secureStore";
 
 const getApiUrl = () => {
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
-  }
   const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.debuggerHost;
   if (hostUri) {
     const ip = hostUri.split(":")[0];
     return `http://${ip}:5000/api`;
+  }
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
   }
   if (Platform.OS === "android") {
     return "http://10.0.2.2:5000/api";

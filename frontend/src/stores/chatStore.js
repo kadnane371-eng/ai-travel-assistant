@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { initSocket, getSocket, emitSendMessage, emitConfirmTrip } from "../services/socket";
+import chatApi from "../services/chat.api";
 import tripApi from "../services/trip.api";
 
 export const useChatStore = create((set, get) => ({
@@ -17,96 +17,15 @@ export const useChatStore = create((set, get) => ({
   isStreaming: false,
   streamingText: "",
   error: null,
-  socketConnected: false,
+  socketConnected: true,
 
-  // Initialisation et écoute des événements Socket.io
+  // Initialisation (charge l'historique sans besoin de WebSocket)
   initChatSocket: async () => {
-    try {
-      const socket = await initSocket();
-      if (!socket) return;
-
-      set({ socketConnected: socket.connected });
-
-      socket.off("connect");
-      socket.off("agent_typing");
-      socket.off("agent_chunk");
-      socket.off("trip_created");
-      socket.off("error");
-
-      socket.on("connect", () => {
-        set({ socketConnected: true });
-      });
-
-      socket.on("disconnect", () => {
-        set({ socketConnected: false });
-      });
-
-      // Écoute de l'indicateur de saisie de l'agent
-      socket.on("agent_typing", (data) => {
-        const { isTyping } = data;
-        set({ isTyping });
-
-        // Si l'écriture est terminée et qu'on a du texte streamé
-        if (!isTyping) {
-          const currentStream = get().streamingText;
-          if (currentStream && currentStream.trim()) {
-            const newAssistantMsg = {
-              id: "assistant-" + Date.now(),
-              sender: "assistant",
-              content: currentStream,
-              createdAt: new Date().toISOString(),
-            };
-            set((state) => ({
-              messages: [...state.messages, newAssistantMsg],
-              streamingText: "",
-              isStreaming: false,
-            }));
-          }
-        }
-      });
-
-      // Écoute de chaque chunk de texte streamé
-      socket.on("agent_chunk", (data) => {
-        const { textChunk, conversationId } = data;
-        if (conversationId && !get().currentConversationId) {
-          set({ currentConversationId: conversationId });
-        }
-        set((state) => ({
-          isStreaming: true,
-          streamingText: state.streamingText + textChunk,
-        }));
-      });
-
-      // Écoute de la création de voyage
-      socket.on("trip_created", (data) => {
-        const { message, trip } = data;
-        const confirmationMsg = {
-          id: "sys-" + Date.now(),
-          sender: "assistant",
-          content: `🎉 ${message}\nVotre voyage à **${trip?.city || "Maroc"}** a été enregistré avec succès !`,
-          tripData: trip,
-          createdAt: new Date().toISOString(),
-        };
-        set((state) => ({
-          messages: [...state.messages, confirmationMsg],
-        }));
-      });
-
-      // Écoute des erreurs de l'agent
-      socket.on("error", (errData) => {
-        set({
-          error: errData.message || "Une erreur est survenue avec l'assistant.",
-          isTyping: false,
-          isStreaming: false,
-        });
-      });
-    } catch (err) {
-      console.warn("Erreur lors de l'initialisation du chat socket:", err);
-    }
+    await get().loadHistory();
   },
 
-  // Envoi d'un message utilisateur
-  sendMessage: (content) => {
+  // Envoi d'un message utilisateur via HTTP REST
+  sendMessage: async (content) => {
     if (!content || !content.trim()) return;
 
     const trimmed = content.trim();
@@ -119,18 +38,74 @@ export const useChatStore = create((set, get) => ({
 
     set((state) => ({
       messages: [...state.messages, userMsg],
-      streamingText: "",
-      isStreaming: true,
+      isTyping: true,
       error: null,
     }));
 
-    const conversationId = get().currentConversationId;
-    emitSendMessage(conversationId, trimmed);
+    try {
+      const conversationId = get().currentConversationId;
+      const res = await chatApi.sendMessage(conversationId, trimmed);
+
+      if (res?.data) {
+        const { conversationId: newConvId, assistantMessage } = res.data;
+        if (newConvId && !get().currentConversationId) {
+          set({ currentConversationId: newConvId });
+        }
+
+        const newMsg = {
+          id: assistantMessage.id || "assistant-" + Date.now(),
+          sender: "assistant",
+          content: assistantMessage.content,
+          createdAt: assistantMessage.createdAt || new Date().toISOString(),
+        };
+
+        set((state) => ({
+          messages: [...state.messages, newMsg],
+          isTyping: false,
+        }));
+      }
+    } catch (err) {
+      console.error("Erreur sendMessage HTTP:", err);
+      const errMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Erreur de communication avec l'assistant.";
+      set({
+        error: errMsg,
+        isTyping: false,
+      });
+    }
   },
 
-  // Confirmation d'un plan de voyage proposé par l'IA
-  confirmTrip: (tripData) => {
-    emitConfirmTrip(tripData);
+  // Confirmation d'un plan de voyage proposé par l'IA via HTTP REST
+  confirmTrip: async (tripData) => {
+    try {
+      set({ isTyping: true, error: null });
+      const res = await chatApi.confirmTrip(tripData);
+      const trip = res?.data;
+
+      const confirmationMsg = {
+        id: "sys-" + Date.now(),
+        sender: "assistant",
+        content: `🎉 ${res?.message || "Itinéraire enregistré !"}\nVotre voyage à **${trip?.city || "Maroc"}** a été enregistré avec succès !`,
+        tripData: trip,
+        createdAt: new Date().toISOString(),
+      };
+
+      set((state) => ({
+        messages: [...state.messages, confirmationMsg],
+        isTyping: false,
+      }));
+    } catch (err) {
+      console.error("Erreur confirmTrip HTTP:", err);
+      set({
+        error:
+          err.response?.data?.message ||
+          err.message ||
+          "Erreur lors de la confirmation du voyage.",
+        isTyping: false,
+      });
+    }
   },
 
   // Charger l'historique des conversations

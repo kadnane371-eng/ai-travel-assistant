@@ -139,20 +139,6 @@ export default function TripDetailScreen() {
   const days = activeTrip.days && activeTrip.days.length > 0 ? activeTrip.days : mockTripFallback.days;
   const activeDay = days[activeDayIndex] || days[0];
 
-  const handleSaveTrip = () => {
-    Alert.alert(
-      "Voyage Sauvegardé !",
-      "Votre itinéraire est enregistré dans votre compte et disponible hors-ligne.",
-      [
-        {
-          text: "Voir mes voyages",
-          onPress: () => router.push("/(tabs)/trips"),
-        },
-        { text: "OK", style: "cancel" },
-      ]
-    );
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -236,7 +222,7 @@ export default function TripDetailScreen() {
       >
         <CustomButton
           title="Sauvegarder ce voyage"
-          onPress={handleSaveTrip}
+          onPress={() => router.push("/(tabs)/trips")}
           size="lg"
           icon={<Ionicons name="bookmark-outline" size={18} color="#FFFFFF" />}
           style={styles.saveBtn}
